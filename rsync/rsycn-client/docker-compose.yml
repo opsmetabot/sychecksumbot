@@ -1,0 +1,14 @@
+version: '2'
+services:
+  rsync-client:
+    restart: always
+    image: commanderhu/rsync-client
+    container_name: rsync-client
+    volumes:
+      - ./rsync_backup/:/backup_client/    #左边备份文件存的路径
+    ports:
+      - "22023:22"
+    environment:
+      - SLEEP_TIME=30 #单位:秒,每次备份间隔时间，默认为86400
+      - EXPIRATION_DAY=15 #单位:天,文件保留时间 
+      - MINIMUM_DISK=5 #单位:G，最小磁盘预留空

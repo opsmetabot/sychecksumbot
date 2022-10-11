@@ -1,0 +1,15 @@
+version: '2'
+services:
+  rsync-server:
+    restart: always
+    image: commanderhu/rsync-server
+    container_name: rsync-server
+    volumes:
+      - ./data/:/data/        #左边路径指定需要备份的路径
+    ports:
+      - "874:873"
+    environment:
+      - RSYNC_IP=106.13.216.62                #本机地址
+      - RSYNC_PORT=874                        #映射端口
+      - REMOTE_HOST_IP=119.29.79.150   #客户端ip
+      - REMOTE_HOST_PORT=22023      #客户端端口
