@@ -1,0 +1,12 @@
+etcd:
+  host: "127.0.0.1"
+  port: 2379
+  password:
+fileList:
+  path: /home/scrip/fileList.config
+
+kafka:
+  host: "106.13.216.62:9092"
+  topic: "kafka-test"
+  groupid: 'kafka-test'
+  prefix: "/apps/desk.hdqmjs.com"

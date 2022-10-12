@@ -1,0 +1,9 @@
+kafka:
+  receive:
+    host: "106.13.216.62:9092"
+    topic: "sync-file"
+    groupid: 'sync-file'
+  send:
+    host: "106.13.216.62:9092"
+    topic: "file-content"
+    groupid: 'file-content'

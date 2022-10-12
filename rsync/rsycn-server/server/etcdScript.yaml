@@ -1,0 +1,11 @@
+etcd:
+  host: "127.0.0.1"
+  port: 2379
+  password:
+fileList:
+  path: E:\programcode\pythoncode\etcd\fileList.cofig
+
+kafka:
+  host: "106.13.216.62:9092"
+  topic: "kafka-test"
+  groupid: 'kafka-test'
