@@ -1,0 +1,17 @@
+etcd:
+  host: "127.0.0.1"
+  port: 2379
+  password:
+
+kafka:
+  host: "106.13.216.62:9092"
+  topic: "kafka-test"
+  receive:
+    host: "106.13.216.62:9092"
+    topic: "sync-file"
+    groupid: 'sync-file'
+  send:
+    host: "106.13.216.62:9092"
+    topic: "file-content"
+    groupid: 'kafka-test'
+    prefix: "/apps"

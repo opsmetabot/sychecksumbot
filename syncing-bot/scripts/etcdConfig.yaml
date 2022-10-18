@@ -1,0 +1,6 @@
+etcd:
+  host: "127.0.0.1"
+  port: 2379
+  password:
+fileList:
+  path: E:\programcode\pythoncode\etcd\fileList.config

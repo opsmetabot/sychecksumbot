@@ -1,0 +1,22 @@
+version: "2"
+
+services:
+  syncingcron:
+    image: testcontainers/sshd:1.1.0
+    container_name: syncingcron 
+    volumes:
+      - ./ssh/id_rsa:/root/.ssh/id_rsa
+      - ./ssh/id_rsa.pub:/root/.ssh/id_rsa.pub
+      - ./ssh/known_hosts:/root/.ssh/knows_hosts
+      - ./bin:/usr/local/bin 
+      - ./tasks.cron:/etc/crontabs/root
+    networks:
+      - syncingbot-net
+    command: 
+      - /usr/bin/tail
+      - '-f'
+
+networks:
+  syncingbot-net:
+    name: syncingbot-net
+

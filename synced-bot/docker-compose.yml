@@ -1,0 +1,14 @@
+version: "3"
+services:
+  daemon:
+    image: python3:sync
+   
+    volumes:
+      - ./synced-bot:/work
+    #  - ./root:/var/spool/cron/crontabs/root
+    # command: ["cron", "-f"]
+    command: ["python3", "/work/receiveKafka.py"]
+
+    user: root
+    # privileged: true
+    # restart: always

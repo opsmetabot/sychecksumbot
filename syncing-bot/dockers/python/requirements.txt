@@ -1,0 +1,6 @@
+protobuf==3.19.0
+etcd3
+pyyaml
+kafka
+pykafka
+kafka-python

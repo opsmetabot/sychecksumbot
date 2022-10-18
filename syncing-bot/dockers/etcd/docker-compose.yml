@@ -1,0 +1,33 @@
+version: "2"
+
+services:
+  etcd:
+    image: docker.io/bitnami/etcd:3
+    container_name: etcd
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+    volumes:
+      - etcd_data:/bitnami/etcd
+    networks:
+      - etcd-net
+    ports:
+      - 2379:2379
+
+#  etcd-ui:
+#    image: soyking/e3w
+#    container_name: etcd-ui
+#    volumes:
+#      - ./conf/config.default.ini:/app/conf/config.default.ini
+#    networks:
+#      - etcd-net
+#    ports:
+#      - "12380:8080"
+
+networks:
+  etcd-net:
+    name: etcd-net
+
+volumes:
+  etcd_data:
+    driver: local
+

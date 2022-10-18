@@ -1,0 +1,11 @@
+version: "3"
+services:
+  daemon:
+    image: python3:sync
+    volumes:
+      - ../scripts:/scripts
+    working_dir: /scripts
+    command: ["python3", "syncDaemon.py"]
+    user: root
+    # privileged: true
+    # restart: always
