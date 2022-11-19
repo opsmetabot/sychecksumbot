@@ -1,0 +1,9 @@
+kafka:
+  host: "106.13.216.62:9092"
+  groupid: 'syncing-dir-bot'
+  checksum:
+    topic: "sync-checksum"
+  deference:
+    topic: "syncing-dir-bot"
+  file:
+    topic: "synced-dir-bot"

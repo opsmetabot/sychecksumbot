@@ -1,12 +1,12 @@
-from pykafka import KafkaClient
-import threading
-import etcd3
-import json
-import yaml
-from kafka import KafkaProducer, KafkaConsumer
-import sys
 import getopt
+import json
+import sys
+import etcd3
+import yaml
+from kafka import KafkaProducer
 from loguru import logger
+from pykafka import KafkaClient
+import os
 
 
 @logger.catch
@@ -31,6 +31,15 @@ def realFile(filePath):
         file_object1.close()
     return data
 
+@logger.catch
+def dirFilesPath(path):
+
+    filePaths = []  # 存储目录下的所有文件名，含路径
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            filePaths.append(os.path.abspath(file))
+    return filePaths
+
 
 @logger.catch
 def connectEtcd(cfg):
@@ -39,6 +48,7 @@ def connectEtcd(cfg):
     password = cfg['etcd']['password']
     etcd = etcd3.client(host, port)
     return etcd
+
 
 @logger.catch
 def getEtcdData(fileList, etcd):
@@ -53,6 +63,7 @@ def getEtcdData(fileList, etcd):
             etcdData[key] = "null"
     return etcdData
 
+
 @logger.catch
 def sendKafkaMessage(message, cfg):
     KAFKA_HOST = cfg["kafka"]['host']  # Or the address you want
@@ -61,6 +72,7 @@ def sendKafkaMessage(message, cfg):
     with topic.get_sync_producer() as producer:
         encoded_message = message.encode("utf-8")
         producer.produce(encoded_message)
+
 
 @logger.catch
 def start_producer(host, topic, msg, key):
@@ -90,30 +102,38 @@ if __name__ == '__main__':
 
     argv = sys.argv
     try:
-        options, args = getopt.getopt(sys.argv[1:], "hf:p:", ["help", "fileList=", "prefix="])
+        options, args = getopt.getopt(sys.argv[1:], "hf:d:p:", ["help", "fileList=", "dir=","prefix="])
     except getopt.GetoptError:
         sys.exit()
 
     if len(argv) < 5:
         logger.info("参数错误" + argv)
-        print("python3 sendKafaka.py <-f> fileList <--prefix> prefix")
+        print("python3 send-etcd-to-kafka.py [<-f> fileList | <-d> dir] <--prefix> prefix")
         sys.exit()
 
-    if "-f" not in argv or "--prefix" not in argv:
+    if("-f" in argv and "-d" in argv ):
         logger.info("参数错误" + argv)
-        print("python3 sendKafaka.py <-f> fileList <--prefix> prefix")
+        print("python3 send-etcd-to-kafka.py [<-f> fileList | <-d> dir] <--prefix> prefix")
+        sys.exit()
+
+    if ("-f" not in argv or "--prefix" not in argv) or ("-d" not in argv or "--prefix" not in argv):
+        logger.info("参数错误" + argv)
+        print("python3 send-etcd-to-kafka.py [<-f> fileList | <-d> dir] <--prefix> prefix")
         sys.exit()
 
     fileListPath = ""
 
     # 修改命令行读取
     prefix = ""
+    dir = ""
 
     for name, value in options:
         if name in ("-f", "--fileList"):
             fileListPath = value
         if name in ("-p", "--prefix"):
             prefix = value
+        if name in ("-d","--dir"):
+            dir = value
 
     logger.info("fileList:" + fileListPath + "---" + "prefix:" + prefix)
 
@@ -122,7 +142,13 @@ if __name__ == '__main__':
     topic = cfg["kafka"]["topic"]
     etcd = connectEtcd(cfg)
 
-    fileList = realFile(fileListPath)
+    fileList = None
+
+    if "-f" in argv:
+        fileList = realFile(fileListPath)
+    else:
+        fileList = dirFilesPath(dir)
+
     etcdData = getEtcdData(fileList, etcd)
 
     addPrefix = {}

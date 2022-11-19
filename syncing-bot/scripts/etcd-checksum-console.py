@@ -1,6 +1,8 @@
 import yaml
 import etcd3
 import sys
+import getopt
+import os
 
 # 加载yaml文件
 def readEtcdCofig(configName):
@@ -22,6 +24,13 @@ def realFile(filePath):
     finally:
         file_object1.close()
     return data
+def dirFilesPath(path):
+
+    filePaths = []  # 存储目录下的所有文件名，含路径
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            filePaths.append(os.path.abspath(file))
+    return filePaths
 
 # 读取etcd 配置文件 并连接etcd
 def connectEtcd(cfg):
@@ -60,15 +69,40 @@ def readFileListChecksum(fileList,etcd):
 
 
 if __name__ == '__main__':
+    argv = sys.argv
     etcdConfig = readEtcdCofig("syncing.yaml")
     etcdConnect  = connectEtcd(etcdConfig)
 
-    argv = sys.argv
-    if(len(argv)<2):
-        print("python3 etcd-checksum-console.py <fileList>")
+    try:
+        options, args = getopt.getopt(sys.argv[1:], "hf:d:", ["help", "fileList=", "dir="])
+    except getopt.GetoptError:
         sys.exit()
-    fileListPath = argv[1]
-    fileList = realFile(fileListPath)
+
+    if ("-f" in argv and "-d" in argv) and ("-f" not in argv or "-d" not in argv):
+        print("python3 etcd-checksum-console.py [-f <fileList>|-d <dir>]")
+        sys.exit()
+
+
+    if(len(argv)<3):
+        print("python3 etcd-checksum-console.py [-f <fileList>|-d <dir>]")
+        sys.exit()
+
+    fileListPath = ""
+
+    # 修改命令行读取
+    dir = ""
+
+    for name, value in options:
+        if name in ("-f", "--fileList"):
+            fileListPath = value
+        if name in ("-d","--dir"):
+            dir = value
+
+    if "-f" in argv:
+        fileList = realFile(fileListPath)
+    else:
+        fileList = dirFilesPath(dir)
+
 
     checksumData =  readFileListChecksum(fileList,etcdConnect)
     printEtcdChecksum(checksumData)

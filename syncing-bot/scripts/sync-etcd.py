@@ -3,6 +3,7 @@ import hashlib
 import os
 import yaml
 import sys
+import getopt
 from loguru import logger
 
 
@@ -27,6 +28,15 @@ def realFile(filePath):
     finally:
         file_object1.close()
     return data
+
+@logger.catch
+def dirFilesPath(path):
+
+    filePaths = []  # 存储目录下的所有文件名，含路径
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            filePaths.append(os.path.abspath(file))
+    return filePaths
 
 
 @logger.catch
@@ -82,19 +92,38 @@ if __name__ == '__main__':
                rotation="00:00", retention="30 days")
 
     logger.info('sync-etcd日志')
+
     argv = sys.argv
 
-    if len(argv) < 2:
-        logger.info("参数错误" + argv)
-        print("python3 etcdScript <fileList>")
+    try:
+        options, args = getopt.getopt(sys.argv[1:], "hf:d:", ["help", "fileList=", "dir="])
+    except getopt.GetoptError:
         sys.exit()
+
+
+    if ("-f" in argv and "-d" in argv) and ("-f" not in argv or "-d" not in argv):
+        print("python3 sync-etcd.py [-f <fileList>|-d <dir>]")
+        sys.exit()
+
+
+    fileListPath = ""
+
+    # 修改命令行读取
+    dir = ""
+
+    for name, value in options:
+        if name in ("-f", "--fileList"):
+            fileListPath = value
+        if name in ("-d", "--dir"):
+            dir = value
+
+    if "-f" in argv:
+        fileList = realFile(fileListPath)
+    else:
+        fileList = dirFilesPath(dir)
 
     cfg = readEtcdCofig("syncing.yaml")
     etcd = connectEtcd(cfg)
 
-    # 改为指定的 fileList
-    fileList = argv[1]
-    logger.info("读入文件列表"+"--"+argv[1])
-
-    data = getFileMd5Value(realFile(fileList))
+    data = getFileMd5Value(fileList)
     setEtcdValue(data, etcd)
